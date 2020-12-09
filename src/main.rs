@@ -1,10 +1,10 @@
 mod player;
 mod routes;
 mod state;
-use state::State;
 use player::query_player;
 use routes::{echo_player, echo_players};
 use sqlx::postgres::PgPoolOptions;
+use state::State;
 
 #[async_std::main]
 async fn main() -> tide::Result<()> {

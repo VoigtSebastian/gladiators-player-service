@@ -1,5 +1,5 @@
-use crate::state::State;
 use crate::player::{player_vector_response, Player};
+use crate::state::State;
 
 // curl localhost:8080/echo/player \
 // -d '{ "id": 1, "player_name": "test", "games_played": 2, "games_won": 3}'
