@@ -20,6 +20,14 @@ impl Player {
     }
 }
 
+pub async fn query_player(connection: &PgPool, id: i32) -> Option<Player> {
+    sqlx::query_as::<_, Player>("SELECT * FROM players WHERE id = $1;")
+        .bind(id)
+        .fetch_optional(connection)
+        .await
+        .unwrap_or(None)
+}
+
 pub fn player_vector_response(player: &Vec<Player>) -> tide::Result {
     let mut response = Response::new(StatusCode::Ok);
     response.set_content_type(mime::JSON);
