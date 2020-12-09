@@ -1,16 +1,16 @@
-use crate::gladiator::{gladiator_vector_response, Gladiator};
+use crate::player::{player_vector_response, Player};
 use tide::Request;
 
-// curl localhost:8080/echo/gladiator \
+// curl localhost:8080/echo/player \
 // -d '{ "id": 1, "player_name": "test", "games_played": 2, "games_won": 3}'
-pub async fn echo_gladiator(mut req: Request<()>) -> tide::Result {
-    let gladiator: Gladiator = req.body_json().await?;
+pub async fn echo_player(mut req: Request<()>) -> tide::Result {
+    let gladiator: Player = req.body_json().await?;
     gladiator.build_response()
 }
 
-// curl localhost:8080/echo/gladiators \
+// curl localhost:8080/echo/players \
 // -d '[{ "id": 1, "player_name": "test", "games_played": 2, "games_won": 3}, { "id": 2, "name": "test", "games_played": 2, "games_won": 3}]'
-pub async fn echo_gladiators(mut req: Request<()>) -> tide::Result {
-    let gladiators: Vec<Gladiator> = req.body_json().await?;
-    gladiator_vector_response(&gladiators)
+pub async fn echo_players(mut req: Request<()>) -> tide::Result {
+    let gladiators: Vec<Player> = req.body_json().await?;
+    player_vector_response(&gladiators)
 }
