@@ -5,7 +5,7 @@ use tide::{Body, Request, Response, StatusCode};
 #[derive(Debug, Deserialize, Serialize)]
 struct Gladiator {
     id: u32,
-    name: String,
+    player_name: String,
     games_played: u32,
     games_won: u32,
 }
@@ -36,14 +36,14 @@ async fn main() -> tide::Result<()> {
 }
 
 // curl localhost:8080/echo/gladiator \
-// -d '{ "id": 1, "name": "test", "games_played": 2, "games_won": 3}'
+// -d '{ "id": 1, "player_name": "test", "games_played": 2, "games_won": 3}'
 async fn echo_gladiator(mut req: Request<()>) -> tide::Result {
     let gladiator: Gladiator = req.body_json().await?;
     gladiator.build_response()
 }
 
 // curl localhost:8080/echo/gladiators \
-// -d '[{ "id": 1, "name": "test", "games_played": 2, "games_won": 3}, { "id": 2, "name": "test", "games_played": 2, "games_won": 3}]'
+// -d '[{ "id": 1, "player_name": "test", "games_played": 2, "games_won": 3}, { "id": 2, "name": "test", "games_played": 2, "games_won": 3}]'
 async fn echo_gladiators(mut req: Request<()>) -> tide::Result {
     let gladiators: Vec<Gladiator> = req.body_json().await?;
     gladiator_vector_response(&gladiators)
