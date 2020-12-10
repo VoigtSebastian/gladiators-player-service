@@ -2,7 +2,7 @@ mod error;
 mod player;
 mod routes;
 mod state;
-use routes::{echo_player, echo_players, player_lookup};
+use routes::{echo_player, echo_players, player_lookup, players_lookup};
 use sqlx::postgres::PgPoolOptions;
 use state::State;
 
@@ -17,6 +17,7 @@ async fn main() -> tide::Result<()> {
     app.at("/echo/player").post(echo_player);
     app.at("/echo/players").post(echo_players);
     app.at("/player/:id").get(player_lookup);
+    app.at("/players").get(players_lookup);
     app.listen("127.0.0.1:8080").await?;
     Ok(())
 }

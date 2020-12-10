@@ -2,6 +2,7 @@ use sqlx::postgres::PgPool;
 use tide::convert::{Deserialize, Serialize};
 use tide::http::mime;
 use tide::{Body, Response, StatusCode};
+use async_std::stream::StreamExt;
 
 #[derive(Debug, Deserialize, Serialize, sqlx::FromRow)]
 pub struct Player {
@@ -26,6 +27,19 @@ pub async fn query_player(connection: &PgPool, id: i32) -> Option<Player> {
         .fetch_optional(connection)
         .await
         .unwrap_or(None)
+}
+
+pub async fn query_players(connection: &PgPool) -> Vec<Player> {
+    let mut players: Vec<Player> = vec!();
+    let mut query = sqlx::query_as::<_, Player>("SELECT * FROM players;").fetch(connection);
+
+    while let Some(player) = query.next().await {
+        match player {
+            Ok(player) => players.push(player),
+            Err(_) => ()
+        }
+    }
+    players
 }
 
 pub fn player_vector_response(player: &Vec<Player>) -> tide::Result {
