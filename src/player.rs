@@ -21,7 +21,7 @@ impl Player {
     }
 }
 
-pub async fn query_player(connection: &PgPool, id: i32) -> Option<Player> {
+pub async fn query_player_by_id(connection: &PgPool, id: i32) -> Option<Player> {
     sqlx::query_as::<_, Player>("SELECT * FROM players WHERE id = $1;")
         .bind(id)
         .fetch_optional(connection)

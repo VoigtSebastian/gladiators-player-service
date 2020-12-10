@@ -1,6 +1,6 @@
 use crate::error::{argument_parsing_error, CustomError, ErrorType};
-use crate::player::{query_player, query_players};
 use crate::player::{player_vector_response, Player};
+use crate::player::{query_player_by_id, query_players};
 use crate::state::State;
 
 // curl localhost:8080/echo/player \
@@ -24,7 +24,7 @@ pub async fn player_lookup(req: tide::Request<State>) -> tide::Result {
         Ok(id) => id,
     };
 
-    match query_player(&req.state().pg_pool, id).await {
+    match query_player_by_id(&req.state().pg_pool, id).await {
         Some(player) => player.build_response(),
         None => CustomError {
             error_type: ErrorType::PlayerNotFound,
