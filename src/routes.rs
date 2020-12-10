@@ -1,4 +1,4 @@
-use crate::error::{CustomError, ErrorType};
+use crate::error::{argument_parsing_error, CustomError, ErrorType};
 use crate::player::query_player;
 use crate::player::{player_vector_response, Player};
 use crate::state::State;
@@ -19,13 +19,17 @@ pub async fn echo_players(mut req: tide::Request<State>) -> tide::Result {
 
 // curl localhost:8080/player/4
 pub async fn player_lookup(req: tide::Request<State>) -> tide::Result {
-    let id = req.param("id")?.parse::<i32>()?;
+    let id = match req.param("id")?.parse::<i32>() {
+        Err(_) => return argument_parsing_error("id", "i32").into(),
+        Ok(id) => id,
+    };
+
     match query_player(&req.state().pg_pool, id).await {
         Some(gladiator) => gladiator.build_response(),
         None => CustomError {
             error_type: ErrorType::PlayerNotFound,
             message: format!("Could not find a player with id {}", id),
         }
-        .build_response(),
+        .into(),
     }
 }
