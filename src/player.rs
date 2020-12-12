@@ -89,22 +89,38 @@ pub async fn add_player(connection: &PgPool, name: String) -> Result<Player, ()>
     }
 }
 
-pub async fn update_player(connection: &PgPool, name: String, won: bool) -> Result<Player, ()> {
+/// Updates games_played and games_won of the specified Player
+///
+/// The player is selected by its id field.
+///
+/// This function assumes that the player is part of the database and does not
+/// do a lookup before execution.
+async fn update_player_stats(
+    connection: &PgPool,
+    player: &Player,
+) -> Result<sqlx::postgres::PgDone, sqlx::Error> {
+    sqlx::query("UPDATE players SET (games_played, games_won) = ($1, $2) WHERE id = $3;")
+        .bind(player.games_played)
+        .bind(player.games_won)
+        .bind(&player.id)
+        .execute(connection)
+        .await
+}
+
+/// Updates a Players games_played and games_won field, returns an Err if the
+/// specified name is not in the database.
+pub async fn player_played_round(
+    connection: &PgPool,
+    name: &String,
+    won: bool,
+) -> Result<Player, ()> {
     match query_player_by_name(connection, &name).await {
         Some(mut player) => {
             player.games_played += 1;
             if won {
                 player.games_won += 1;
             }
-            match sqlx::query(
-                "UPDATE players SET (games_played, games_won) = ($1, $2) WHERE player_name = $3;"
-            )
-            .bind(player.games_played)
-            .bind(player.games_won)
-            .bind(&name)
-            .execute(connection)
-            .await
-            {
+            match update_player_stats(connection, &player).await {
                 Ok(_) => Ok(player),
                 Err(_) => Err(()),
             }
