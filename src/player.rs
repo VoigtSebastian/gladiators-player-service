@@ -46,6 +46,7 @@ pub async fn query_player_by_id(connection: &PgPool, id: i32) -> Option<Player> 
 /// (player_name in the Player struct and database).
 ///
 /// Returns None if there is no such player in the database.
+///
 /// Returns the Player if it is in the database.
 pub async fn query_player_by_name(connection: &PgPool, name: &String) -> Option<Player> {
     sqlx::query_as::<_, Player>("SELECT * FROM players WHERE player_name = $1;")
