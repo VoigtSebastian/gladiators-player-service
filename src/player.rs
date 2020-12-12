@@ -89,15 +89,15 @@ pub async fn query_players_range(connection: &PgPool, from: i32, to: i32) -> Vec
 /// Adds a new player to the database.
 /// Returns an error if the specified Player is already in the database
 /// (if the name of the Player is already in use).
-pub async fn add_player(connection: &PgPool, name: String) -> Result<Player, ()> {
+pub async fn add_player(connection: &PgPool, name: &String) -> Result<Player, ()> {
     match query_player_by_name(connection, &name).await {
         Some(_) => return Err(()),
-        None => match sqlx::query("INSERT INTO players (id, player_name, games_played, games_won) VALUES (DEFAULT, '$1', 0, 0);")
+        None => match sqlx::query("INSERT INTO players (id, player_name, games_played, games_won) VALUES (DEFAULT, $1, 0, 0);")
             .bind(&name)
             .execute(connection).await {
                 Ok(_) => match query_player_by_name(connection, &name).await {
                             Some(player) => Ok(player),
-                            None => Err(())
+                            None => Err(()),
                 },
                 Err(_) => Err(()),
             },
