@@ -2,18 +2,16 @@ mod error;
 mod player;
 mod routes;
 mod state;
-use async_std::future::timeout;
 use routes::*;
 use sqlx::postgres::PgPoolOptions;
 use state::State;
-use std::time::Duration;
 
 #[async_std::main]
 async fn main() -> tide::Result<()> {
-    let connect = PgPoolOptions::new()
+    let pool = PgPoolOptions::new()
         .max_connections(5)
-        .connect("postgresql://postgres:unsecure_password@localhost/gladiators_player_service");
-    let pool = timeout(Duration::from_secs(5), connect).await??;
+        .connect("postgresql://postgres:unsecure_password@localhost/gladiators_player_service")
+        .await?;
 
     let mut app = tide::with_state(State::new(pool));
     app.at("/echo/player").post(echo_player);
