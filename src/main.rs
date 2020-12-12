@@ -1,5 +1,6 @@
 mod error;
 mod player;
+mod queries;
 mod routes;
 mod state;
 use routes::*;

@@ -1,6 +1,6 @@
 use crate::error::CustomError;
-use crate::player::*;
 use crate::player::{player_vector_response, Player};
+use crate::queries::*;
 use crate::state::State;
 
 // curl localhost:8080/echo/player \
