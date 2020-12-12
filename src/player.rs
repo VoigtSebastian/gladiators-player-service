@@ -13,6 +13,14 @@ pub struct Player {
 }
 
 impl Player {
+    pub fn new(id: i32, player_name: String, games_played: i32, games_won: i32) -> Player {
+        Player {
+            id: id,
+            player_name: player_name,
+            games_played: games_played,
+            games_won: games_won
+        }
+    }
     pub fn build_response(&self) -> tide::Result {
         let mut response = Response::new(StatusCode::Ok);
         response.set_content_type(mime::JSON);
