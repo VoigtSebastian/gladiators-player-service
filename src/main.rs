@@ -19,6 +19,7 @@ async fn main() -> tide::Result<()> {
     app.at("/echo/player").post(echo_player);
     app.at("/echo/players").post(echo_players);
     app.at("/player/:id").get(player_lookup_by_id);
+    app.at("/player/register/:name").post(register_player);
     app.at("/player/name/:name").get(player_lookup_by_name);
     app.at("/player/won/:name").post(player_won);
     app.at("/player/played/:name").post(player_played);

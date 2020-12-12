@@ -71,3 +71,14 @@ pub async fn player_won(req: tide::Request<State>) -> tide::Result {
         Err(_) => CustomError::new_player_not_found_by_name_error(name).into(),
     }
 }
+
+pub async fn register_player(req: tide::Request<State>) -> tide::Result {
+    let name = match req.param("name")?.parse::<String>() {
+        Err(_) => return CustomError::new_argument_parsing_error("name", "String").into(),
+        Ok(name) => name.replace("%20", " "),
+    };
+    match add_player(&req.state().pg_pool, &name).await {
+        Ok(player) => player.build_response(),
+        Err(_) => CustomError::new_player_already_existing_error(&name).into(),
+    }
+}
