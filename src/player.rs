@@ -18,7 +18,7 @@ impl Player {
             id: id,
             player_name: player_name,
             games_played: games_played,
-            games_won: games_won
+            games_won: games_won,
         }
     }
     pub fn build_response(&self) -> tide::Result {
@@ -29,6 +29,11 @@ impl Player {
     }
 }
 
+/// Retrieves an user from the database by its id
+/// (id in the Player struct and database).
+///
+/// Returns None if there is no such player in the database.
+/// Returns the Player if it is in the database.
 pub async fn query_player_by_id(connection: &PgPool, id: i32) -> Option<Player> {
     sqlx::query_as::<_, Player>("SELECT * FROM players WHERE id = $1;")
         .bind(id)
@@ -37,6 +42,11 @@ pub async fn query_player_by_id(connection: &PgPool, id: i32) -> Option<Player> 
         .unwrap_or(None)
 }
 
+/// Retrieves an user from the database by its name
+/// (player_name in the Player struct and database).
+///
+/// Returns None if there is no such player in the database.
+/// Returns the Player if it is in the database.
 pub async fn query_player_by_name(connection: &PgPool, name: &String) -> Option<Player> {
     sqlx::query_as::<_, Player>("SELECT * FROM players WHERE player_name = $1;")
         .bind(name)
@@ -45,6 +55,7 @@ pub async fn query_player_by_name(connection: &PgPool, name: &String) -> Option<
         .unwrap_or(None)
 }
 
+/// Returns **ALL** players that are stored in the database
 pub async fn query_players(connection: &PgPool) -> Vec<Player> {
     let mut players: Vec<Player> = vec![];
     let mut query = sqlx::query_as::<_, Player>("SELECT * FROM players;").fetch(connection);
@@ -58,6 +69,7 @@ pub async fn query_players(connection: &PgPool) -> Vec<Player> {
     players
 }
 
+/// Returns a range of players by their id.
 pub async fn query_players_range(connection: &PgPool, from: i32, to: i32) -> Vec<Player> {
     let mut players: Vec<Player> = vec![];
     let mut query = sqlx::query_as::<_, Player>("SELECT * FROM players WHERE id > $1 AND id < $2;")
@@ -74,6 +86,9 @@ pub async fn query_players_range(connection: &PgPool, from: i32, to: i32) -> Vec
     players
 }
 
+/// Adds a new player to the database.
+/// Returns an error if the specified Player is already in the database
+/// (if the name of the Player is already in use).
 pub async fn add_player(connection: &PgPool, name: String) -> Result<Player, ()> {
     match query_player_by_name(connection, &name).await {
         Some(_) => return Err(()),
@@ -129,9 +144,13 @@ pub async fn player_played_round(
     }
 }
 
-pub fn player_vector_response(player: &Vec<Player>) -> tide::Result {
+/// Builds a tide::Result from a vector of Players.
+///
+/// The Response has the status-code 200 and contains a json serialization
+/// of all Players contained in the parameter.
+pub fn player_vector_response(players: &Vec<Player>) -> tide::Result {
     let mut response = Response::new(StatusCode::Ok);
     response.set_content_type(mime::JSON);
-    response.set_body(Body::from_json(&player)?);
+    response.set_body(Body::from_json(&players)?);
     Ok(response)
 }
