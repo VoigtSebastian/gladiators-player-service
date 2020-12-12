@@ -18,6 +18,7 @@ async fn main() -> tide::Result<()> {
     app.at("/echo/players").post(echo_players);
     app.at("/player/:id").get(player_lookup);
     app.at("/players").get(players_lookup);
+    app.with(driftwood::DevLogger);
     app.listen("127.0.0.1:8080").await?;
     Ok(())
 }
