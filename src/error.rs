@@ -6,6 +6,7 @@ use tide::{Body, Response, StatusCode};
 pub enum ErrorType {
     PlayerNotFound,
     ParsingError,
+    PlayerAlreadyExisting,
 }
 
 #[derive(Serialize, Debug, Clone)]
@@ -58,6 +59,12 @@ impl CustomError {
         CustomError::new(
             format!("Could not find a player with name {}", id),
             ErrorType::PlayerNotFound,
+        )
+    }
+    pub fn new_player_already_existing_error(name: &String) -> CustomError {
+        CustomError::new(
+            format!("A Player with the name {} does already exist", name),
+            ErrorType::PlayerAlreadyExisting,
         )
     }
 }
