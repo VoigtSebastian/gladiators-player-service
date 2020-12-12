@@ -15,7 +15,7 @@ async fn main() -> tide::Result<()> {
         .connect("postgresql://postgres:unsecure_password@localhost/gladiators_player_service");
     let pool = timeout(Duration::from_secs(5), connect).await??;
 
-    let mut app = tide::with_state(State { pg_pool: pool });
+    let mut app = tide::with_state(State::new(pool));
     app.at("/echo/player").post(echo_player);
     app.at("/echo/players").post(echo_players);
     app.at("/player/:id").get(player_lookup_by_id);
