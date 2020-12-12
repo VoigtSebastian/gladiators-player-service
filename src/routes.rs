@@ -1,5 +1,5 @@
-use crate::error::{argument_parsing_error, CustomError, ErrorType};
-use crate::player::{player_played_round, query_player_by_id, query_player_by_name, query_players};
+use crate::error::CustomError;
+use crate::player::*;
 use crate::player::{player_vector_response, Player};
 use crate::state::State;
 
@@ -20,35 +20,26 @@ pub async fn echo_players(mut req: tide::Request<State>) -> tide::Result {
 // curl localhost:8080/player/id/:id
 pub async fn player_lookup_by_id(req: tide::Request<State>) -> tide::Result {
     let id = match req.param("id")?.parse::<i32>() {
-        Err(_) => return argument_parsing_error("id", "i32").into(),
+        Err(_) => return CustomError::new_argument_parsing_error("id", "i32").into(),
         Ok(id) => id,
     };
 
     match query_player_by_id(&req.state().pg_pool, id).await {
         Some(player) => player.build_response(),
-        None => CustomError {
-            error_type: ErrorType::PlayerNotFound,
-            message: format!("Could not find a player with id {}", id),
-        }
-        .into(),
+        None => CustomError::new_player_not_found_by_id_error(id).into(),
     }
 }
 
-// TODO: Make spaces in names forbidden?
 // curl localhost:8080/player/name/:name
 pub async fn player_lookup_by_name(req: tide::Request<State>) -> tide::Result {
     let name = match req.param("name")?.parse::<String>() {
-        Err(_) => return argument_parsing_error("name", "String").into(),
+        Err(_) => return CustomError::new_argument_parsing_error("name", "String").into(),
         Ok(name) => name.replace("%20", " "),
     };
 
     match query_player_by_name(&req.state().pg_pool, &name).await {
         Some(player) => player.build_response(),
-        None => CustomError {
-            error_type: ErrorType::PlayerNotFound,
-            message: format!("Could not find a player with name {}", name),
-        }
-        .into(),
+        None => CustomError::new_player_not_found_by_name_error(name).into(),
     }
 }
 
@@ -59,32 +50,24 @@ pub async fn players_lookup(req: tide::Request<State>) -> tide::Result {
 
 pub async fn player_played(req: tide::Request<State>) -> tide::Result {
     let name = match req.param("name")?.parse::<String>() {
-        Err(_) => return argument_parsing_error("name", "String").into(),
+        Err(_) => return CustomError::new_argument_parsing_error("name", "String").into(),
         Ok(name) => name.replace("%20", " "),
     };
 
     match player_played_round(&req.state().pg_pool, &name, false).await {
         Ok(player) => player.build_response(),
-        Err(_) => CustomError {
-            error_type: ErrorType::PlayerNotFound,
-            message: format!("Could not find a player with name {}", name),
-        }
-        .into(),
+        Err(_) => CustomError::new_player_not_found_by_name_error(name).into(),
     }
 }
 
 pub async fn player_won(req: tide::Request<State>) -> tide::Result {
     let name = match req.param("name")?.parse::<String>() {
-        Err(_) => return argument_parsing_error("name", "String").into(),
+        Err(_) => return CustomError::new_argument_parsing_error("name", "String").into(),
         Ok(name) => name.replace("%20", " "),
     };
 
     match player_played_round(&req.state().pg_pool, &name, true).await {
         Ok(player) => player.build_response(),
-        Err(_) => CustomError {
-            error_type: ErrorType::PlayerNotFound,
-            message: format!("Could not find a player with name {}", name),
-        }
-        .into(),
+        Err(_) => CustomError::new_player_not_found_by_name_error(name).into(),
     }
 }

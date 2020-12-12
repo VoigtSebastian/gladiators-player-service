@@ -1,7 +1,6 @@
 use tide::convert::Serialize;
 use tide::http::mime;
 use tide::{Body, Response, StatusCode};
-// use std::fmt;
 
 #[derive(Serialize, Debug, Clone)]
 pub enum ErrorType {
@@ -30,12 +29,35 @@ impl Into<tide::Result> for CustomError {
     }
 }
 
-pub fn argument_parsing_error(argument_name: &str, argument_type_description: &str) -> CustomError {
-    CustomError {
-        message: format!(
-            "Could not parse argument {} into {}",
-            argument_name, argument_type_description
-        ),
-        error_type: ErrorType::ParsingError,
+impl CustomError {
+    pub fn new(message: String, error_type: ErrorType) -> CustomError {
+        CustomError {
+            message: message,
+            error_type: error_type,
+        }
+    }
+    pub fn new_argument_parsing_error(
+        argument_name: &str,
+        argument_type_description: &str,
+    ) -> CustomError {
+        CustomError::new(
+            format!(
+                "Could not parse argument {} into {}",
+                argument_name, argument_type_description
+            ),
+            ErrorType::ParsingError,
+        )
+    }
+    pub fn new_player_not_found_by_name_error(name: String) -> CustomError {
+        CustomError::new(
+            format!("Could not find a player with name {}", name),
+            ErrorType::PlayerNotFound,
+        )
+    }
+    pub fn new_player_not_found_by_id_error(id: i32) -> CustomError {
+        CustomError::new(
+            format!("Could not find a player with name {}", id),
+            ErrorType::PlayerNotFound,
+        )
     }
 }
