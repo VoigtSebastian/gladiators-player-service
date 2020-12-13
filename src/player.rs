@@ -1,6 +1,7 @@
 use tide::convert::{Deserialize, Serialize};
 use tide::http::mime;
 use tide::{Body, Response, StatusCode};
+use crate::error::CustomError;
 use regex::Regex;
 use lazy_static::lazy_static;
 
@@ -21,11 +22,11 @@ pub struct PlayerName {
 }
 
 impl PlayerName {
-    pub fn new(name: &String) -> Result<PlayerName, ()> {
+    pub fn new(name: &String) -> Result<PlayerName, CustomError> {
         if PLAYER_NAME_REGEX.is_match(&name) {
             return Ok(PlayerName { name: name.to_string() });
         } else {
-            Err(())
+            Err(CustomError::player_name_has_wrong_format(name))
         }
     }
 }

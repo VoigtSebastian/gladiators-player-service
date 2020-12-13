@@ -59,7 +59,7 @@ pub async fn player_played(req: tide::Request<State>) -> tide::Result {
     };
     let player_name = match PlayerName::new(&name) {
         Ok(player_name) => player_name,
-        Err(_) => return CustomError::player_name_has_wrong_format(&name).into()
+        Err(err) => return err.into()
     };
 
     match player_played_round(&req.state().pg_pool, &player_name, false).await {
@@ -75,7 +75,7 @@ pub async fn player_won(req: tide::Request<State>) -> tide::Result {
     };
     let player_name = match PlayerName::new(&name) {
         Ok(player_name) => player_name,
-        Err(_) => return CustomError::player_name_has_wrong_format(&name).into()
+        Err(err) => return err.into()
     };
 
     match player_played_round(&req.state().pg_pool, &player_name, true).await {
@@ -91,7 +91,7 @@ pub async fn register_player(req: tide::Request<State>) -> tide::Result {
     };
     let player_name = match PlayerName::new(&name) {
         Ok(player_name) => player_name,
-        Err(_) => return CustomError::player_name_has_wrong_format(&name).into()
+        Err(err) => return err.into()
     };
 
     match add_player(&req.state().pg_pool, &player_name).await {
