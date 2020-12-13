@@ -1,5 +1,5 @@
 use crate::error::CustomError;
-use crate::player::{player_vector_response, Player};
+use crate::player::{player_vector_response, Player, PlayerName};
 use crate::queries::*;
 use crate::state::State;
 
@@ -36,8 +36,12 @@ pub async fn player_lookup_by_name(req: tide::Request<State>) -> tide::Result {
         Err(_) => return CustomError::new_argument_parsing_error("name", "String").into(),
         Ok(name) => name.replace("%20", " "),
     };
+    let player_name = match PlayerName::new(&name) {
+        Ok(player_name) => player_name,
+        Err(_) => return CustomError::player_name_has_wrong_format(&name).into()
+    };
 
-    match query_player_by_name(&req.state().pg_pool, &name).await {
+    match query_player_by_name(&req.state().pg_pool, &player_name).await {
         Some(player) => player.build_response(),
         None => CustomError::new_player_not_found_by_name_error(name).into(),
     }
@@ -53,8 +57,12 @@ pub async fn player_played(req: tide::Request<State>) -> tide::Result {
         Err(_) => return CustomError::new_argument_parsing_error("name", "String").into(),
         Ok(name) => name.replace("%20", " "),
     };
+    let player_name = match PlayerName::new(&name) {
+        Ok(player_name) => player_name,
+        Err(_) => return CustomError::player_name_has_wrong_format(&name).into()
+    };
 
-    match player_played_round(&req.state().pg_pool, &name, false).await {
+    match player_played_round(&req.state().pg_pool, &player_name, false).await {
         Ok(player) => player.build_response(),
         Err(_) => CustomError::new_player_not_found_by_name_error(name).into(),
     }
@@ -65,8 +73,12 @@ pub async fn player_won(req: tide::Request<State>) -> tide::Result {
         Err(_) => return CustomError::new_argument_parsing_error("name", "String").into(),
         Ok(name) => name.replace("%20", " "),
     };
+    let player_name = match PlayerName::new(&name) {
+        Ok(player_name) => player_name,
+        Err(_) => return CustomError::player_name_has_wrong_format(&name).into()
+    };
 
-    match player_played_round(&req.state().pg_pool, &name, true).await {
+    match player_played_round(&req.state().pg_pool, &player_name, true).await {
         Ok(player) => player.build_response(),
         Err(_) => CustomError::new_player_not_found_by_name_error(name).into(),
     }
@@ -77,7 +89,12 @@ pub async fn register_player(req: tide::Request<State>) -> tide::Result {
         Err(_) => return CustomError::new_argument_parsing_error("name", "String").into(),
         Ok(name) => name.replace("%20", " "),
     };
-    match add_player(&req.state().pg_pool, &name).await {
+    let player_name = match PlayerName::new(&name) {
+        Ok(player_name) => player_name,
+        Err(_) => return CustomError::player_name_has_wrong_format(&name).into()
+    };
+
+    match add_player(&req.state().pg_pool, &player_name).await {
         Ok(player) => player.build_response(),
         Err(_) => CustomError::new_player_already_existing_error(&name).into(),
     }

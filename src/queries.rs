@@ -1,4 +1,4 @@
-use crate::player::Player;
+use crate::player::{Player, PlayerName};
 use async_std::stream::StreamExt;
 use sqlx::postgres::PgPool;
 
@@ -21,9 +21,9 @@ pub async fn query_player_by_id(connection: &PgPool, id: i32) -> Option<Player> 
 /// Returns None if there is no such player in the database.
 ///
 /// Returns the Player if it is in the database.
-pub async fn query_player_by_name(connection: &PgPool, name: &String) -> Option<Player> {
+pub async fn query_player_by_name(connection: &PgPool, player_name: &PlayerName) -> Option<Player> {
     sqlx::query_as::<_, Player>("SELECT * FROM players WHERE player_name = $1;")
-        .bind(name)
+        .bind(&player_name.name)
         .fetch_optional(connection)
         .await
         .unwrap_or(None)
@@ -63,13 +63,13 @@ pub async fn query_players_range(connection: &PgPool, from: i32, to: i32) -> Vec
 /// Adds a new player to the database.
 /// Returns an error if the specified Player is already in the database
 /// (if the name of the Player is already in use).
-pub async fn add_player(connection: &PgPool, name: &String) -> Result<Player, ()> {
-    match query_player_by_name(connection, &name).await {
+pub async fn add_player(connection: &PgPool, player_name: &PlayerName) -> Result<Player, ()> {
+    match query_player_by_name(connection, player_name).await {
         Some(_) => return Err(()),
         None => match sqlx::query("INSERT INTO players (id, player_name, games_played, games_won) VALUES (DEFAULT, $1, 0, 0);")
-            .bind(&name)
+            .bind(&player_name.name)
             .execute(connection).await {
-                Ok(_) => match query_player_by_name(connection, &name).await {
+                Ok(_) => match query_player_by_name(connection, player_name).await {
                             Some(player) => Ok(player),
                             None => Err(()),
                 },
@@ -100,10 +100,10 @@ async fn update_player_stats(
 /// specified name is not in the database.
 pub async fn player_played_round(
     connection: &PgPool,
-    name: &String,
+    player_name: &PlayerName,
     won: bool,
 ) -> Result<Player, ()> {
-    match query_player_by_name(connection, &name).await {
+    match query_player_by_name(connection, player_name).await {
         Some(mut player) => {
             player.games_played += 1;
             if won {
