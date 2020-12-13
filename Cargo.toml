@@ -11,3 +11,5 @@ serde = "1.0.118"
 
 sqlx = { version = "0.4.0", features = [ "runtime-async-std-native-tls", "postgres"] }
 driftwood = "0.0.5"
+regex = "1.4.2"
+lazy_static = "1.4.0"
