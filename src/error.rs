@@ -7,6 +7,7 @@ pub enum ErrorType {
     PlayerNotFound,
     ParsingError,
     PlayerAlreadyExisting,
+    PlayerNameWrongFormat,
 }
 
 #[derive(Serialize, Debug, Clone)]
@@ -66,5 +67,10 @@ impl CustomError {
             format!("A Player with the name {} does already exist", name),
             ErrorType::PlayerAlreadyExisting,
         )
+    }
+    pub fn player_name_has_wrong_format(name: &String) -> CustomError {
+        CustomError::new(
+            format!("The name {} has the wrong format", name),
+            ErrorType::PlayerNameWrongFormat)
     }
 }
