@@ -1,6 +1,12 @@
 use tide::convert::{Deserialize, Serialize};
 use tide::http::mime;
 use tide::{Body, Response, StatusCode};
+use regex::Regex;
+use lazy_static::lazy_static;
+
+lazy_static! {
+    static ref PLAYER_NAME_REGEX: Regex = Regex::new(r"^\p{letter}[\p{letter}|_|\d]{3,20}$").unwrap();
+}
 
 #[derive(Debug, Deserialize, Serialize, sqlx::FromRow)]
 pub struct Player {
@@ -8,6 +14,20 @@ pub struct Player {
     pub player_name: String,
     pub games_played: i32,
     pub games_won: i32,
+}
+
+pub struct PlayerName {
+    pub name: String
+}
+
+impl PlayerName {
+    pub fn new(name: &String) -> Result<PlayerName, ()> {
+        if PLAYER_NAME_REGEX.is_match(&name) {
+            return Ok(PlayerName { name: name.to_string() });
+        } else {
+            Err(())
+        }
+    }
 }
 
 impl Player {
@@ -36,4 +56,23 @@ pub fn player_vector_response(players: &Vec<Player>) -> tide::Result {
     response.set_content_type(mime::JSON);
     response.set_body(Body::from_json(&players)?);
     Ok(response)
+}
+
+
+#[test]
+fn player_names() {
+    assert_eq!(true, PlayerName::new(&"aaaa".to_string()).is_ok());
+    assert_eq!(true, PlayerName::new(&"dave".to_string()).is_ok());
+    assert_eq!(true, PlayerName::new(&"dave_dave_".to_string()).is_ok());
+    assert_eq!(true, PlayerName::new(&"dave_d4ve".to_string()).is_ok());
+    assert_eq!(true, PlayerName::new(&"dave_".to_string()).is_ok());
+    assert_eq!(true, PlayerName::new(&"davü".to_string()).is_ok());
+    assert_eq!(true, PlayerName::new(&"dave_ß".to_string()).is_ok());
+    assert_eq!(true, PlayerName::new(&"da1234ve".to_string()).is_ok());
+
+    assert_ne!(true, PlayerName::new(&"-".to_string()).is_ok());
+    assert_ne!(true, PlayerName::new(&"_dave".to_string()).is_ok());
+    assert_ne!(true, PlayerName::new(&"dave dave".to_string()).is_ok());
+    assert_ne!(true, PlayerName::new(&" dave".to_string()).is_ok());
+    assert_ne!(true, PlayerName::new(&"da#ve".to_string()).is_ok());
 }
