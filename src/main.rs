@@ -8,12 +8,18 @@ use sqlx::postgres::PgPoolOptions;
 use state::State;
 use std::option_env;
 
+static DATABASE_UP: &'static str = include_str!("../sql/up.sql");
+
 #[async_std::main]
 async fn main() -> tide::Result<()> {
     let pool = PgPoolOptions::new()
         .max_connections(5)
         .connect(option_env!("DATABASE_URL")
             .unwrap_or("postgresql://postgres:unsecure_password@localhost/gladiators_player_service"))
+        .await?;
+
+    sqlx::query(DATABASE_UP)
+        .execute(&pool)
         .await?;
 
     let mut app = tide::with_state(State::new(pool));
