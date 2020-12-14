@@ -6,12 +6,14 @@ mod state;
 use routes::*;
 use sqlx::postgres::PgPoolOptions;
 use state::State;
+use std::option_env;
 
 #[async_std::main]
 async fn main() -> tide::Result<()> {
     let pool = PgPoolOptions::new()
         .max_connections(5)
-        .connect("postgresql://postgres:unsecure_password@localhost/gladiators_player_service")
+        .connect(option_env!("DATABASE_URL")
+            .unwrap_or("postgresql://postgres:unsecure_password@localhost/gladiators_player_service"))
         .await?;
 
     let mut app = tide::with_state(State::new(pool));
