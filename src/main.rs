@@ -24,6 +24,6 @@ async fn main() -> tide::Result<()> {
     app.at("/player/played/:name").post(player_played);
     app.at("/players").get(players_lookup);
     app.with(driftwood::DevLogger);
-    app.listen("127.0.0.1:8080").await?;
+    app.listen("0.0.0.0:8080").await?;
     Ok(())
 }
