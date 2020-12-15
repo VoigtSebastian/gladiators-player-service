@@ -17,11 +17,19 @@ pub struct Player {
     pub games_won: i32,
 }
 
+/// Struct to represent a players name.
+///
+/// This struct should be used when passing around a players name, as it
+/// assures a certain format (regex: PLAYER_NAME_REGEX).
 pub struct PlayerName {
     name: String
 }
 
 impl PlayerName {
+    /// Function used to create a Player.
+    ///
+    /// This function uses PLAYER_NAME_REGEX to assure, that the name has the
+    /// correct format.
     pub fn new(name: &String) -> Result<PlayerName, CustomError> {
         if PLAYER_NAME_REGEX.is_match(&name) {
             return Ok(PlayerName { name: name.to_string() });
@@ -29,6 +37,7 @@ impl PlayerName {
             Err(CustomError::player_name_has_wrong_format(name))
         }
     }
+    /// Returns a immutable borrowed string to the players name.
     pub fn name(&self) -> &String {
         &self.name
     }
