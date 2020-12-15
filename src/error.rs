@@ -58,7 +58,7 @@ impl CustomError {
     }
     pub fn new_player_not_found_by_id_error(id: i32) -> CustomError {
         CustomError::new(
-            format!("Could not find a player with name {}", id),
+            format!("Could not find a player with id {}", id),
             ErrorType::PlayerNotFound,
         )
     }
