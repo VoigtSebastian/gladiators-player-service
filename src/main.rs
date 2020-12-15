@@ -6,12 +6,20 @@ mod state;
 use routes::*;
 use sqlx::postgres::PgPoolOptions;
 use state::State;
+use std::option_env;
+
+static DATABASE_UP: &'static str = include_str!("../sql/up.sql");
 
 #[async_std::main]
 async fn main() -> tide::Result<()> {
     let pool = PgPoolOptions::new()
         .max_connections(5)
-        .connect("postgresql://postgres:unsecure_password@localhost/gladiators_player_service")
+        .connect(option_env!("DATABASE_URL")
+            .unwrap_or("postgresql://postgres:unsecure_password@localhost/gladiators_player_service"))
+        .await?;
+
+    sqlx::query(DATABASE_UP)
+        .execute(&pool)
         .await?;
 
     let mut app = tide::with_state(State::new(pool));
@@ -24,6 +32,6 @@ async fn main() -> tide::Result<()> {
     app.at("/player/played/:name").post(player_played);
     app.at("/players").get(players_lookup);
     app.with(driftwood::DevLogger);
-    app.listen("127.0.0.1:8080").await?;
+    app.listen("0.0.0.0:8080").await?;
     Ok(())
 }

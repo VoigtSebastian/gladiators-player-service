@@ -25,7 +25,7 @@ docker run \
 
 **Obvious heads-up** there is nothing secure about the way the password is
 hard-coded into the docker-command and the script.
-I will change this behavior in a future commit, even if, in the end, this is
+*I will change this behavior in a future commit*, even if, in the end, this is
 just an educational project.
 
 ### Initialization
@@ -33,4 +33,19 @@ To create the 'players' table and populate the database with test-data, run.
 ```sh
 psql -h localhost -p 5432 -U postgres -d gladiators_player_service -a -f sql/up.sql
 psql -h localhost -p 5432 -U postgres -d gladiators_player_service -a -f sql/example_data.sql
+```
+
+## Container
+Building the services container is pretty straightforward.
+The actual build happens while building the container, so that you don't
+need to install cargo or rustup to do this.
+
+> :warning: This will use **a lot** of resources. Do not run this on a machine
+without a decent amount of resources.
+
+```sh
+docker build . -t voigtsebastian/gladiator-player-service:debug
+docker run \
+    --name=player_service \
+    -p 8080:8080 -d voigtsebastian/gladiator-player-service:debug
 ```

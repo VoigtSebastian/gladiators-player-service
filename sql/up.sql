@@ -1,5 +1,5 @@
 -- Create players table
-CREATE TABLE players (
+CREATE TABLE IF NOT EXISTS players (
   id SERIAL PRIMARY KEY,
   player_name VARCHAR(50) NOT NULL,
   games_played INTEGER NOT NULL,
