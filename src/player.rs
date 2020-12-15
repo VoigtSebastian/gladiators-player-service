@@ -1,12 +1,13 @@
+use crate::error::CustomError;
+use lazy_static::lazy_static;
+use regex::Regex;
 use tide::convert::{Deserialize, Serialize};
 use tide::http::mime;
 use tide::{Body, Response, StatusCode};
-use crate::error::CustomError;
-use regex::Regex;
-use lazy_static::lazy_static;
 
 lazy_static! {
-    static ref PLAYER_NAME_REGEX: Regex = Regex::new(r"^\p{letter}[\p{letter}|_|\d]{3,20}$").unwrap();
+    static ref PLAYER_NAME_REGEX: Regex =
+        Regex::new(r"^\p{letter}[\p{letter}|_|\d]{3,20}$").unwrap();
 }
 
 #[derive(Debug, Deserialize, Serialize, sqlx::FromRow)]
@@ -22,7 +23,7 @@ pub struct Player {
 /// This struct should be used when passing around a players name, as it
 /// assures a certain format (regex: PLAYER_NAME_REGEX).
 pub struct PlayerName {
-    name: String
+    name: String,
 }
 
 impl PlayerName {
@@ -32,7 +33,9 @@ impl PlayerName {
     /// correct format.
     pub fn new(name: &String) -> Result<PlayerName, CustomError> {
         if PLAYER_NAME_REGEX.is_match(&name) {
-            return Ok(PlayerName { name: name.to_string() });
+            return Ok(PlayerName {
+                name: name.to_string(),
+            });
         } else {
             Err(CustomError::player_name_has_wrong_format(name))
         }
@@ -70,7 +73,6 @@ pub fn player_vector_response(players: &Vec<Player>) -> tide::Result {
     response.set_body(Body::from_json(&players)?);
     Ok(response)
 }
-
 
 #[test]
 fn player_names() {

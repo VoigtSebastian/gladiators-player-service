@@ -71,6 +71,7 @@ impl CustomError {
     pub fn player_name_has_wrong_format(name: &String) -> CustomError {
         CustomError::new(
             format!("The name {} has the wrong format", name),
-            ErrorType::PlayerNameWrongFormat)
+            ErrorType::PlayerNameWrongFormat,
+        )
     }
 }
