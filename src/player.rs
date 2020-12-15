@@ -18,7 +18,7 @@ pub struct Player {
 }
 
 pub struct PlayerName {
-    pub name: String
+    name: String
 }
 
 impl PlayerName {
@@ -28,6 +28,9 @@ impl PlayerName {
         } else {
             Err(CustomError::player_name_has_wrong_format(name))
         }
+    }
+    pub fn name(&self) -> &String {
+        &self.name
     }
 }
 

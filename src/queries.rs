@@ -23,7 +23,7 @@ pub async fn query_player_by_id(connection: &PgPool, id: i32) -> Option<Player> 
 /// Returns the Player if it is in the database.
 pub async fn query_player_by_name(connection: &PgPool, player_name: &PlayerName) -> Option<Player> {
     sqlx::query_as::<_, Player>("SELECT * FROM players WHERE player_name = $1;")
-        .bind(&player_name.name)
+        .bind(&player_name.name())
         .fetch_optional(connection)
         .await
         .unwrap_or(None)
@@ -67,7 +67,7 @@ pub async fn add_player(connection: &PgPool, player_name: &PlayerName) -> Result
     match query_player_by_name(connection, player_name).await {
         Some(_) => return Err(()),
         None => match sqlx::query("INSERT INTO players (id, player_name, games_played, games_won) VALUES (DEFAULT, $1, 0, 0);")
-            .bind(&player_name.name)
+            .bind(&player_name.name())
             .execute(connection).await {
                 Ok(_) => match query_player_by_name(connection, player_name).await {
                             Some(player) => Ok(player),
