@@ -3,7 +3,7 @@ mod player;
 mod queries;
 mod routes;
 mod state;
-use actix_web::web::{get, post};
+use actix_web::web::{get, post, scope};
 use actix_web::{App, HttpServer};
 use routes::*;
 use sqlx::postgres::PgPoolOptions;
@@ -41,14 +41,20 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .wrap(TracingLogger)
             .data(State::new(pool.clone()))
-            .route("/echo/player", post().to(echo_player))
-            .route("/echo/players", post().to(echo_players))
-            .route("/player/{id}", get().to(player_lookup_by_id))
-            .route("/player/name/{name}", get().to(player_lookup_by_name))
+            .service(
+                scope("/echo")
+                    .route("/player", post().to(echo_player))
+                    .route("/players", post().to(echo_players)),
+            )
+            .service(
+                scope("/player")
+                    .route("/{id}", get().to(player_lookup_by_id))
+                    .route("/name/{name}", get().to(player_lookup_by_name))
+                    .route("/register/{name}", post().to(register_player))
+                    .route("/won/{name}", post().to(player_won))
+                    .route("/played/{name}", post().to(player_played)),
+            )
             .route("/players", get().to(players_lookup))
-            .route("/player/won/{name}", post().to(player_won))
-            .route("/player/played/{name}", post().to(player_played))
-            .route("/player/register/{name}", post().to(register_player))
     })
     .bind("0.0.0.0:5050")?
     .run()
