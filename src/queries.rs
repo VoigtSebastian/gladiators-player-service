@@ -1,5 +1,6 @@
 use crate::player::{Player, PlayerName};
-use async_std::stream::StreamExt;
+// Necessary to import as query.next() needs this
+use futures::stream::StreamExt;
 use sqlx::postgres::PgPool;
 
 /// Retrieves an user from the database by its id
@@ -43,22 +44,22 @@ pub async fn query_players(connection: &PgPool) -> Vec<Player> {
     players
 }
 
-/// Returns a range of players by their id.
-pub async fn query_players_range(connection: &PgPool, from: i32, to: i32) -> Vec<Player> {
-    let mut players: Vec<Player> = vec![];
-    let mut query = sqlx::query_as::<_, Player>("SELECT * FROM players WHERE id > $1 AND id < $2;")
-        .bind(from)
-        .bind(to)
-        .fetch(connection);
+// /// Returns a range of players by their id.
+// pub async fn query_players_range(connection: &PgPool, from: i32, to: i32) -> Vec<Player> {
+//     let mut players: Vec<Player> = vec![];
+//     let mut query = sqlx::query_as::<_, Player>("SELECT * FROM players WHERE id > $1 AND id < $2;")
+//         .bind(from)
+//         .bind(to)
+//         .fetch(connection);
 
-    while let Some(player) = query.next().await {
-        match player {
-            Ok(player) => players.push(player),
-            Err(_) => (),
-        }
-    }
-    players
-}
+//     while let Some(player) = query.next().await {
+//         match player {
+//             Ok(player) => players.push(player),
+//             Err(_) => (),
+//         }
+//     }
+//     players
+// }
 
 /// Adds a new player to the database.
 /// Returns an error if the specified Player is already in the database

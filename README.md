@@ -47,5 +47,5 @@ without a decent amount of resources.
 docker build . -t voigtsebastian/gladiator-player-service:debug
 docker run \
     --name=player_service \
-    -p 8080:8080 -d voigtsebastian/gladiator-player-service:debug
+    -p 5050:5050 -d voigtsebastian/gladiator-player-service:debug
 ```

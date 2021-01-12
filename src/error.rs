@@ -1,11 +1,10 @@
-use tide::convert::Serialize;
-use tide::http::mime;
-use tide::{Body, Response, StatusCode};
+use actix_web::{Error, HttpRequest, HttpResponse, Responder};
+use futures::future::{ready, Ready};
+use serde::Serialize;
 
 #[derive(Serialize, Debug, Clone)]
 pub enum ErrorType {
     PlayerNotFound,
-    ParsingError,
     PlayerAlreadyExisting,
     PlayerNameWrongFormat,
 }
@@ -16,39 +15,12 @@ pub struct CustomError {
     pub message: String,
 }
 
-impl Into<tide::Response> for CustomError {
-    fn into(self) -> tide::Response {
-        let mut response = Response::new(StatusCode::BadRequest);
-        response.set_content_type(mime::JSON);
-        response.set_body(Body::from_json(&self).unwrap_or(Body::from_string("{{}}".to_string())));
-        response
-    }
-}
-
-impl Into<tide::Result> for CustomError {
-    fn into(self) -> tide::Result {
-        Ok(self.into())
-    }
-}
-
 impl CustomError {
     pub fn new(message: String, error_type: ErrorType) -> CustomError {
         CustomError {
             message: message,
             error_type: error_type,
         }
-    }
-    pub fn new_argument_parsing_error(
-        argument_name: &str,
-        argument_type_description: &str,
-    ) -> CustomError {
-        CustomError::new(
-            format!(
-                "Could not parse argument {} into {}",
-                argument_name, argument_type_description
-            ),
-            ErrorType::ParsingError,
-        )
     }
     pub fn new_player_not_found_by_name_error(name: String) -> CustomError {
         CustomError::new(
@@ -73,5 +45,18 @@ impl CustomError {
             format!("The name {} has the wrong format", name),
             ErrorType::PlayerNameWrongFormat,
         )
+    }
+}
+
+impl Responder for CustomError {
+    type Error = Error;
+    type Future = Ready<Result<HttpResponse, Error>>;
+
+    fn respond_to(self, _req: &HttpRequest) -> Self::Future {
+        let body = serde_json::to_string(&self).unwrap();
+
+        ready(Ok(HttpResponse::Ok()
+            .content_type("application/json")
+            .body(body)))
     }
 }
