@@ -6,18 +6,6 @@ use actix_web::web::{Data, Json, Path};
 use actix_web::{Either, Responder, Result};
 use tracing::{info, warn};
 
-// curl localhost:5050/echo/player \
-// -d '{ "id": 1, "player_name": "test", "games_played": 2, "games_won": 3}'
-pub async fn echo_player(Json(player): Json<Player>) -> impl Responder {
-    player
-}
-
-// curl localhost:5050/echo/players \
-// -d '[{ "id": 1, "player_name": "test", "games_played": 2, "games_won": 3}, { "id": 2, "name": "test", "games_played": 2, "games_won": 3}]'
-pub async fn echo_players(players: Json<Vec<Player>>) -> Result<Json<Vec<Player>>> {
-    Ok(players)
-}
-
 // curl localhost:5050/player/id/:id
 pub async fn player_lookup_by_id(
     data: Data<State>,

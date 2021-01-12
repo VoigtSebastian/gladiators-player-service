@@ -42,11 +42,6 @@ async fn main() -> std::io::Result<()> {
             .wrap(TracingLogger)
             .data(State::new(pool.clone()))
             .service(
-                scope("/echo")
-                    .route("/player", post().to(echo_player))
-                    .route("/players", post().to(echo_players)),
-            )
-            .service(
                 scope("/player")
                     .route("/{id}", get().to(player_lookup_by_id))
                     .route("/name/{name}", get().to(player_lookup_by_name))
